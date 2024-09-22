@@ -27,4 +27,7 @@ public class Pizza {
 
     @Column
     private int precio_total;
+
+    @Column
+    private String imagen;
 }
