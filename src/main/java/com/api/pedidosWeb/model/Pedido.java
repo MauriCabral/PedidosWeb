@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -22,7 +23,7 @@ public class Pedido {
     private Cliente cliente;
 
     @Column
-    private LocalDate fecha;
+    private Date fecha;
 
     @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL)
     private List<DetallePedido> detalle_pedido;

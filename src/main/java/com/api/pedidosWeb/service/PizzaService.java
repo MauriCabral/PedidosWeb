@@ -5,21 +5,19 @@ import com.api.pedidosWeb.repository.IPizzaRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.List;
-import java.util.UUID;
 
 @Service
+//@Component
 public class PizzaService {
 
-    @Autowired
-    private IPizzaRepository iPizzaRepository;
+//    @Autowired
+    private final IPizzaRepository iPizzaRepository;
+
+    public PizzaService(IPizzaRepository iPizzaRepository) {
+        this.iPizzaRepository = iPizzaRepository;
+    }
 
     public Pizza savePizza(String nombre, String descripcion, int precio, String imagen) {
         Pizza pizza = new Pizza();

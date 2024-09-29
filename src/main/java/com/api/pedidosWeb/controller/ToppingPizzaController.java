@@ -1,5 +1,8 @@
 package com.api.pedidosWeb.controller;
 
+import com.api.pedidosWeb.dto.ToppingPizzaDto;
+import com.api.pedidosWeb.mapper.AbstractMapper;
+import com.api.pedidosWeb.mapper.ToppingPizzaMapper;
 import com.api.pedidosWeb.model.Pizza;
 import com.api.pedidosWeb.model.ToppingPizza;
 import com.api.pedidosWeb.service.ToppingPizzaService;
@@ -17,33 +20,37 @@ public class ToppingPizzaController {
     @Autowired
     private ToppingPizzaService toppingPizzaService;
 
-    @PostMapping("/create")
-    public ResponseEntity<ToppingPizza> saveToppingPizza (@RequestBody ToppingPizza toppingPizza){
-        ToppingPizza nuevoToppingPizza = toppingPizzaService.saveToppingPizza(
-                toppingPizza.getNombre(),
-                toppingPizza.getPrecio()
-        );
-        return ResponseEntity.status(HttpStatus.CREATED).body(nuevoToppingPizza);
-    }
-
-    @PutMapping("/update")
-    public ResponseEntity<ToppingPizza> updatePizzaById(@RequestBody ToppingPizza toppingPizza, @RequestParam(value = "idToppingPizza") Long id) {
-        ToppingPizza toppingPizzaUp = this.toppingPizzaService.updateToppingPizzaById(toppingPizza, id);
-        return ResponseEntity.status(HttpStatus.CREATED).body(toppingPizzaUp);
-    }
+    @Autowired
+    private ToppingPizzaMapper toppingPizzaMapper;
 
     @GetMapping("/getAll")
-    public List<ToppingPizza> getAllToppingPizza(){
-        return toppingPizzaService.getAllToppingPizza();
+    public List<ToppingPizzaDto> getAllToppingPizza(){
+        List<ToppingPizza> toppingPizzas = toppingPizzaService.getAllToppingPizza();
+        return toppingPizzaMapper.fromEntity(toppingPizzas);
     }
 
     @GetMapping("/getById")
-    public ResponseEntity<ToppingPizza> obtenerTipoPizzaPorId(@RequestParam(value = "idPizza") Long id) {
+    public ResponseEntity<ToppingPizzaDto> obtenerTipoPizzaPorId(@RequestParam(value = "idToppingPizza") Long id) {
         ToppingPizza toppingPizza = toppingPizzaService.getToppingPizzaById(id);
-        if (toppingPizza != null) {
-            return ResponseEntity.ok(toppingPizza);
-        } else {
+        if (toppingPizza == null) {
             return ResponseEntity.notFound().build();
         }
+        ToppingPizzaDto toppingPizzaDto = toppingPizzaMapper.fromEntity(toppingPizza);
+        return ResponseEntity.ok(toppingPizzaDto);
+    }
+
+    @PostMapping("/create")
+    public ResponseEntity<ToppingPizzaDto> createToppingPizza (@RequestBody ToppingPizzaDto toppingPizzaDto){
+        ToppingPizza createToppingPizza = toppingPizzaService.createToppingPizza(toppingPizzaMapper.fromDto(toppingPizzaDto));
+        ToppingPizzaDto createToppingPizzaDto = toppingPizzaMapper.fromEntity(createToppingPizza);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createToppingPizzaDto);
+    }
+
+    @PutMapping("/update")
+    public ResponseEntity<ToppingPizzaDto> updatePizzaById(@RequestBody ToppingPizzaDto toppingPizzaDto, @RequestParam(value = "idToppingPizza") Long id) {
+        ToppingPizza toppingPizzaUpdate = toppingPizzaMapper.fromDto(toppingPizzaDto);
+        ToppingPizza toppingPizzaUpdated = toppingPizzaService.updateToppingPizzaById(toppingPizzaUpdate, id);
+        ToppingPizzaDto dtoToppingPizzaUpdate = toppingPizzaMapper.fromEntity(toppingPizzaUpdated);
+        return ResponseEntity.ok(dtoToppingPizzaUpdate);
     }
 }
