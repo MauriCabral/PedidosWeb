@@ -3,8 +3,8 @@ package com.api.pedidosWeb.controller;
 import com.api.pedidosWeb.dto.PizzaDto;
 import com.api.pedidosWeb.mapper.PizzaMapper;
 import com.api.pedidosWeb.model.Pizza;
-import com.api.pedidosWeb.service.PizzaService;
-import com.api.pedidosWeb.service.UploadFileService;
+import com.api.pedidosWeb.service.serviceImplementation.PizzaServiceImp;
+import com.api.pedidosWeb.service.serviceImplementation.UploadFileServiceImp;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -22,17 +22,17 @@ import java.util.List;
 public class PizzaController {
 
     @Autowired
-    private PizzaService pizzaService;
+    private PizzaServiceImp pizzaServiceImp;
 
     @Autowired
-    private UploadFileService uploadFileService;
+    private UploadFileServiceImp uploadFileServiceImp;
 
     @Autowired
     private PizzaMapper pizzaMapper;
 
     @GetMapping("/getAll")
-    public ResponseEntity<List<PizzaDto>> getAllPizza() {
-        List<Pizza> pizzas = pizzaService.getAllPizza();
+    public ResponseEntity<List<PizzaDto>> getAll() {
+        List<Pizza> pizzas = pizzaServiceImp.getAll();
         if (pizzas.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
@@ -45,8 +45,8 @@ public class PizzaController {
     }
 
     @GetMapping("/getById")
-    public ResponseEntity<PizzaDto> getPizzaById(@RequestParam(value = "idPizza") Long id) {
-        Pizza pizza = pizzaService.getPizzaById(id);
+    public ResponseEntity<PizzaDto> getById(@RequestParam(value = "id") Long id) {
+        Pizza pizza = pizzaServiceImp.getById(id);
         if (pizza == null) {
             return ResponseEntity.notFound().build();
         }
@@ -57,7 +57,7 @@ public class PizzaController {
     @GetMapping("/images/{filename:.+}")
     public ResponseEntity<Resource> serveFile(@PathVariable String filename) {
         try {
-            Resource file = uploadFileService.load(filename);
+            Resource file = uploadFileServiceImp.load(filename);
             return ResponseEntity.ok()
                     .contentType(MediaType.IMAGE_PNG)
                     .body(file);
@@ -67,7 +67,7 @@ public class PizzaController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<PizzaDto> createPizza(@RequestPart("pizza") String pizzaJson, @RequestPart("file") MultipartFile file) {
+    public ResponseEntity<PizzaDto> create(@RequestPart("pizza") String pizzaJson, @RequestPart("file") MultipartFile file) {
         PizzaDto pizzaDto;
         try {
             ObjectMapper objectMapper = new ObjectMapper();
@@ -77,19 +77,19 @@ public class PizzaController {
         }
         String imagePath = null;
         try {
-            imagePath = uploadFileService.copy(file, null);
+            imagePath = uploadFileServiceImp.copy(file, null);
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
         Pizza newPizza = pizzaMapper.fromDto(pizzaDto);
-        newPizza = pizzaService.savePizza(newPizza.getNombre(), newPizza.getDescripcion(), newPizza.getPrecio_total(), imagePath);
+        newPizza = pizzaServiceImp.create(newPizza.getNombre(), newPizza.getDescripcion(), newPizza.getPrecio_total(), imagePath);
 
         PizzaDto newPizzaDto = pizzaMapper.fromEntity(newPizza);
         return ResponseEntity.status(HttpStatus.CREATED).body(newPizzaDto);
     }
 
     @PutMapping("/update")
-    public ResponseEntity<PizzaDto> updatePizzaById(@RequestPart("pizza") String pizzaJson, @RequestPart(value = "file", required = false) MultipartFile file, @RequestParam(value = "idPizza") Long id) {
+    public ResponseEntity<PizzaDto> updateById(@RequestPart("pizza") String pizzaJson, @RequestPart(value = "file", required = false) MultipartFile file, @RequestParam(value = "idPizza") Long id) {
         PizzaDto pizzaDto;
         try {
             ObjectMapper objectMapper = new ObjectMapper();
@@ -101,8 +101,8 @@ public class PizzaController {
         String imagePath = null;
         if (file != null && !file.isEmpty()) {
             try {
-                String existingFilename = pizzaService.getExistingFilenameById(id);
-                imagePath = uploadFileService.copy(file, existingFilename);
+                String existingFilename = pizzaServiceImp.getFileById(id);
+                imagePath = uploadFileServiceImp.copy(file, existingFilename);
             } catch (IOException e) {
                 e.printStackTrace();
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
@@ -110,7 +110,7 @@ public class PizzaController {
         }
         try {
             Pizza pizza = pizzaMapper.fromDto(pizzaDto);
-            Pizza pizzaUpdated = this.pizzaService.updatePizzaById(pizza, id, imagePath);
+            Pizza pizzaUpdated = this.pizzaServiceImp.updateById(pizza, id, imagePath);
 
             PizzaDto pizzaUpdateDto = pizzaMapper.fromEntity(pizzaUpdated);
             return ResponseEntity.status(HttpStatus.OK).body(pizzaUpdateDto);

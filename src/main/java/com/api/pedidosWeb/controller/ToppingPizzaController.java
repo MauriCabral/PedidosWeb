@@ -1,11 +1,9 @@
 package com.api.pedidosWeb.controller;
 
 import com.api.pedidosWeb.dto.ToppingPizzaDto;
-import com.api.pedidosWeb.mapper.AbstractMapper;
 import com.api.pedidosWeb.mapper.ToppingPizzaMapper;
-import com.api.pedidosWeb.model.Pizza;
 import com.api.pedidosWeb.model.ToppingPizza;
-import com.api.pedidosWeb.service.ToppingPizzaService;
+import com.api.pedidosWeb.service.serviceImplementation.ToppingPizzaServiceImp;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,20 +16,20 @@ import java.util.List;
 public class ToppingPizzaController {
 
     @Autowired
-    private ToppingPizzaService toppingPizzaService;
+    private ToppingPizzaServiceImp toppingPizzaServiceImp;
 
     @Autowired
     private ToppingPizzaMapper toppingPizzaMapper;
 
     @GetMapping("/getAll")
-    public List<ToppingPizzaDto> getAllToppingPizza(){
-        List<ToppingPizza> toppingPizzas = toppingPizzaService.getAllToppingPizza();
+    public List<ToppingPizzaDto> getAll(){
+        List<ToppingPizza> toppingPizzas = toppingPizzaServiceImp.getAll();
         return toppingPizzaMapper.fromEntity(toppingPizzas);
     }
 
     @GetMapping("/getById")
-    public ResponseEntity<ToppingPizzaDto> obtenerTipoPizzaPorId(@RequestParam(value = "idToppingPizza") Long id) {
-        ToppingPizza toppingPizza = toppingPizzaService.getToppingPizzaById(id);
+    public ResponseEntity<ToppingPizzaDto> getById(@RequestParam(value = "id") Long id) {
+        ToppingPizza toppingPizza = toppingPizzaServiceImp.getById(id);
         if (toppingPizza == null) {
             return ResponseEntity.notFound().build();
         }
@@ -40,16 +38,16 @@ public class ToppingPizzaController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<ToppingPizzaDto> createToppingPizza (@RequestBody ToppingPizzaDto toppingPizzaDto){
-        ToppingPizza createToppingPizza = toppingPizzaService.createToppingPizza(toppingPizzaMapper.fromDto(toppingPizzaDto));
+    public ResponseEntity<ToppingPizzaDto> create(@RequestBody ToppingPizzaDto toppingPizzaDto){
+        ToppingPizza createToppingPizza = toppingPizzaServiceImp.create(toppingPizzaMapper.fromDto(toppingPizzaDto));
         ToppingPizzaDto createToppingPizzaDto = toppingPizzaMapper.fromEntity(createToppingPizza);
         return ResponseEntity.status(HttpStatus.CREATED).body(createToppingPizzaDto);
     }
 
     @PutMapping("/update")
-    public ResponseEntity<ToppingPizzaDto> updatePizzaById(@RequestBody ToppingPizzaDto toppingPizzaDto, @RequestParam(value = "idToppingPizza") Long id) {
+    public ResponseEntity<ToppingPizzaDto> updateById(@RequestBody ToppingPizzaDto toppingPizzaDto, @RequestParam(value = "id") Long id) {
         ToppingPizza toppingPizzaUpdate = toppingPizzaMapper.fromDto(toppingPizzaDto);
-        ToppingPizza toppingPizzaUpdated = toppingPizzaService.updateToppingPizzaById(toppingPizzaUpdate, id);
+        ToppingPizza toppingPizzaUpdated = toppingPizzaServiceImp.updateById(toppingPizzaUpdate, id);
         ToppingPizzaDto dtoToppingPizzaUpdate = toppingPizzaMapper.fromEntity(toppingPizzaUpdated);
         return ResponseEntity.ok(dtoToppingPizzaUpdate);
     }

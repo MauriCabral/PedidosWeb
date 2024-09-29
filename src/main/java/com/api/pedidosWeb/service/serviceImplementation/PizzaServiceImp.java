@@ -1,7 +1,8 @@
-package com.api.pedidosWeb.service;
+package com.api.pedidosWeb.service.serviceImplementation;
 
 import com.api.pedidosWeb.model.Pizza;
 import com.api.pedidosWeb.repository.IPizzaRepository;
+import com.api.pedidosWeb.service.IPizzaService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -9,17 +10,13 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-//@Component
-public class PizzaService {
+public class PizzaServiceImp implements IPizzaService {
 
-//    @Autowired
-    private final IPizzaRepository iPizzaRepository;
+    @Autowired
+    private IPizzaRepository iPizzaRepository;
 
-    public PizzaService(IPizzaRepository iPizzaRepository) {
-        this.iPizzaRepository = iPizzaRepository;
-    }
-
-    public Pizza savePizza(String nombre, String descripcion, int precio, String imagen) {
+    @Override
+    public Pizza create(String nombre, String descripcion, int precio, String imagen) {
         Pizza pizza = new Pizza();
         pizza.setNombre(nombre);
         pizza.setDescripcion(descripcion);
@@ -28,9 +25,10 @@ public class PizzaService {
         return iPizzaRepository.save(pizza);
     }
 
-    public Pizza updatePizzaById(Pizza pizza, Long id, String imagePath) {
+    @Override
+    public Pizza updateById(Pizza pizza, Long id, String imagePath) {
         Pizza existingPizza = iPizzaRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Pizza no encontrada con el ID: " + id));
+                .orElseThrow(() -> new EntityNotFoundException("Pizza not found with ID: " + id));
         existingPizza.setNombre(pizza.getNombre());
         existingPizza.setDescripcion(pizza.getDescripcion());
         existingPizza.setPrecio_total(pizza.getPrecio_total());
@@ -41,19 +39,21 @@ public class PizzaService {
         return iPizzaRepository.save(existingPizza);
     }
 
-    public List<Pizza> getAllPizza() {
+    @Override
+    public List<Pizza> getAll() {
         return iPizzaRepository.findAll();
     }
 
-    public Pizza getPizzaById(Long id) {
+    @Override
+    public Pizza getById(Long id) {
         return iPizzaRepository.findById(id).orElseThrow(() ->
-                new EntityNotFoundException("Pizza no encontrada con el ID: " + id));
+                new EntityNotFoundException("Pizza not found with ID: " + id));
     }
 
-    public String getExistingFilenameById(Long id) {
+    @Override
+    public String getFileById(Long id) {
         Pizza pizza = iPizzaRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Pizza no encontrada con el ID: " + id));
+                .orElseThrow(() -> new EntityNotFoundException("Pizza not found with ID: " + id));
         return pizza.getImagen();
     }
-
 }

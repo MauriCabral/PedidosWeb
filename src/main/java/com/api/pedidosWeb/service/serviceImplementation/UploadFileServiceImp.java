@@ -1,4 +1,4 @@
-package com.api.pedidosWeb.service;
+package com.api.pedidosWeb.service.serviceImplementation;
 
 import java.io.File;
 import java.io.IOException;
@@ -8,15 +8,14 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
 
-import com.api.pedidosWeb.repository.IUploadFileRepository;
-
+import com.api.pedidosWeb.service.IUploadFileService;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
-public class UploadFileService implements IUploadFileRepository {
+public class UploadFileServiceImp implements IUploadFileService {
 
     private final static String UPLOADS_FOLDER = "src/main/resources/static/uploads";
 
@@ -44,15 +43,12 @@ public class UploadFileService implements IUploadFileRepository {
     }
 
     @Override
-    public boolean delete(String filename) {
+    public void delete(String filename) {
         Path rootPath = getPath(filename);
         File file = rootPath.toFile();
         if(file.exists() && file.canRead()) {
-            if(file.delete()) {
-                return true;
-            }
+            file.delete();
         }
-        return false;
     }
 
     private Path getPath(String filename) {
